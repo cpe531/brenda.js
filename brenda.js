@@ -31,7 +31,23 @@ brenda.Brenda = {
     number: 0,
     leader: 0,
     followers: [],
-    alive: true
+    alive: true,
+
+    title: function() {
+        let s = `The ${brenda.nth(this.number)} Brenda\n`;
+
+        if (this.leader != 0) { // make sure we're not the first brenda
+            let f = 1;
+            let l = brenda._brendas[brenda.indexByNumber(this.leader)];
+
+            for (let i = 0; i < l.followers.length; i++) {
+                if (l.followers[i] == this.number) f = i + 1;
+            }
+
+            s += `${brenda.nth(f)} follower of ${l.title()}`;
+        }
+        return s;
+    }
 };
 
 brenda._brendas = []; 
@@ -55,12 +71,13 @@ brenda.create = function(leader) {
     b.followers = [];
     b.alive = true;
 
-    // add new brenda to it's leaders list of followers
+    // add new brenda to it's leader's list of followers
     let i = brenda.indexByNumber(leader);
     let n = brenda._brendas[i];
     n.followers.push(b.number);
 
     brenda._brendas.push(b);
+    return b;
 };
 
 brenda.nextNumber = function() {
@@ -72,13 +89,25 @@ brenda.nextNumber = function() {
     return brenda._numbers.shift();
 };
 
-brenda.title = function(theBrenda) {
-    let name = `The ${theBrenda.number} Brenda,`;
+brenda.nth = function(n) {
+    if(n >= 10 && n <= 20) return n + 'th'; // <-- weird teens
+    let mod = n % 10;
+    switch(mod) {
+        case 1:     return n + 'st';
+        case 2:     return n + 'nd';
+        case 3:     return n + 'rd';
+        default:    return n + 'th';
+    }
 };
 
 /*
 create the first brenda and followers
 */
-brenda._brendas.push({number: brenda.nextNumber(), leader: 0, followers: []});
+let _first = Object.create(brenda.Brenda);
+_first.number = brenda.nextNumber();
+_first.leader = 0;
+_first.followers = [];
+_first.alive = undefined;    // oh, how strange...
+brenda._brendas.push(_first);
 brenda.create(1);
 for(let i = 0; i < 3; i++) brenda.create(2);    // 3 4 5
